@@ -22,10 +22,6 @@ jobs:
           pip install pipenv
           pipenv install --dev --deploy
       - name: Build and publish
-        env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           pipenv run pytest
           pipenv run python setup.py bdist_wheel
-          pipenv run twine upload dist/*
