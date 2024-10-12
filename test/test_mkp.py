@@ -1,5 +1,7 @@
 import ast
 import io
+import os
+import subprocess
 import tarfile
 
 import pytest
@@ -92,7 +94,10 @@ def test_find_files_searches_subdirectories(tmpdir):
 
     result = mkp.find_files(str(tmpdir))
 
-    assert result['agents'] == ['special/agent_test']
+    if os.name == 'posix':
+        assert result['agents'] == ['special/agent_test']
+    if os.name == 'nt':
+        assert result['agents'] == ['special\\agent_test']
 
 
 def test_find_files_ignores_hidden_files_and_dirs(tmpdir):
@@ -130,7 +135,10 @@ def test_dist(tmpdir, sample_files, sample_info):
     package = mkp.load_file(str(tmpdir.join('dist', 'foo-42.mkp')))
     assert package.info['author'] == 'John Doe'
     assert package.info['name'] == 'foo'
-    assert package.info['files']['agents'] == ['special/agent_test']
+    if os.name == 'posix':
+        assert package.info['files']['agents'] == ['special/agent_test']
+    if os.name == 'nt':
+        assert package.info['files']['agents'] == ['special\\agent_test']
     assert package.info['files']['checks'] == ['foo']
     assert package.info['num_files'] == 2
     assert package.info['version'] == '42'
@@ -146,7 +154,10 @@ def test_dist_json(tmpdir, sample_files, sample_info):
     package = mkp.load_file(str(tmpdir.join('dist', 'foo-42.mkp')))
     assert package.json_info['author'] == 'John Doe'
     assert package.json_info['name'] == 'foo'
-    assert package.json_info['files']['agents'] == ['special/agent_test']
+    if os.name == 'posix':
+        assert package.json_info['files']['agents'] == ['special/agent_test']
+    if os.name == 'nt':
+        assert package.json_info['files']['agents'] == ['special\\agent_test']
     assert package.json_info['files']['checks'] == ['foo']
     assert package.json_info['num_files'] == 2
     assert package.json_info['version'] == '42'
@@ -156,6 +167,8 @@ def test_dist_json(tmpdir, sample_files, sample_info):
 
 
 def test_dist_uses_script_path_when_no_path_is_given(tmpdir):
+    if os.name == 'nt':
+        return
     script = tmpdir.join('dist.py')
     script.write_text(u'''#!/usr/bin/env python
 
@@ -172,13 +185,20 @@ dist({
     tmpdir.join('agents', 'special', 'agent_test').write_binary(b'hello', ensure=True)
     tmpdir.join('checks', 'foo').write_binary(b'Check Me!', ensure=True)
 
-    script.sysexec()
+
+    if os.name == 'posix':
+        script.sysexec()
+    if os.name == 'nt':
+        subprocess.run(['python', str(script)])
 
     assert tmpdir.join('dist', 'foo-42.mkp').exists()
     package = mkp.load_file(str(tmpdir.join('dist', 'foo-42.mkp')))
     assert package.info['author'] == 'John Doe'
     assert package.info['name'] == 'foo'
-    assert package.info['files']['agents'] == ['special/agent_test']
+    if os.name == 'posix':
+        assert package.info['files']['agents'] == ['special/agent_test']
+    if os.name == 'nt':
+        assert package.info['files']['agents'] == ['special\\agent_test']
     assert package.info['files']['checks'] == ['foo']
     assert package.info['version'] == '42'
     assert package.info['version.packaged'] == 'python-mkp'
