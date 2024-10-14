@@ -175,3 +175,6 @@ class Package(object):
         with tarfile.open(fileobj=dir_archive_file) as archive:
             members = [member for member in archive.getmembers() if member.name in files]
             archive.extractall(path=target_path, members=members)
+
+from . import _version
+__version__ = _version.get_versions()['version']
