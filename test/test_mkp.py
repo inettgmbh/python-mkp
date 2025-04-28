@@ -9,8 +9,15 @@ import pytest
 import mkp
 
 DIRECTORIES = [
-    'agents', 'checkman', 'checks', 'doc', 'inventory', 'notifications',
-    'pnp-templates', 'web',
+    'agents',
+    'checkman',
+    'checks',
+    'cmk_addons_plugins',
+    'doc',
+    'inventory',
+    'notifications',
+    'pnp-templates',
+    'web',
 ]
 
 
